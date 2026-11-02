@@ -9,6 +9,7 @@ on:
         default: oneplus_15
         options:
           - oneplus_nord_n30_se_5g_v
+          - oneplus_ace_3v_v
           - oneplus_10r_v
           - oneplus_nord_3_b
           - oneplus_ace_v

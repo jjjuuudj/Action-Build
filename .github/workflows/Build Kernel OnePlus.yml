@@ -103,7 +103,7 @@ on:
         type: string
         description: "管理器分支名(必填)/内置分支名(必填)/自定义版本标识(留空不修改)/回退分支提交哈希版本(留空不修改)//Manager Branch name (Required) / Builtin branch name (Required) / Custom version identifier (Leave blank to not modify) / Rollback branch commit hash version (Leave blank to not modify)"
         required: false
-        default: "main/main/Numbersf/"
+        default: ""
       LZ4_UPDATE:
         type: boolean
         description: "是否升级LZ4到上游最新？//Upgrade LZ4 to the latest upstream?"
@@ -339,7 +339,7 @@ jobs:
           fi
           echo "Selected KPM: ${{ github.event.inputs.KPM }}"
           echo "Custom SUSFS_META: ${{ github.event.inputs.SUSFS_META }}"
-          echo "Custom KSU_META: ${{ github.event.inputs.KSU_META }}"
+          
           echo "Selected ZRAM: ${{ github.event.inputs.ZRAM }}"
           echo "Selected LSM_BBG: ${{ github.event.inputs.LSM_BBG }}"
           echo "Selected NETFILTER: ${{ github.event.inputs.NETFILTER }}"
@@ -655,11 +655,11 @@ jobs:
             chmod +x "$f"
           done
 
-      - name: Add BakaSU
-        run: |
-          cd kernel_workspace/kernel_platform
-          KSU_META="${{ github.event.inputs.KSU_META }}"
-          FAST_BUILD="${{ github.event.inputs.FAST_BUILD }}"
+      - name: Add FinaSU
+  run: |
+    cd kernel_workspace/kernel_platform
+    export FINASU_REF="master"   # 固定使用 master 分支
+    curl -LSs "https://raw.githubusercontent.com/LyraVoid/FinaSU/${FINASU_REF}/kernel/setup.sh" | bash
 
           # 必须包含两个分隔符（至少四个字段）
           if [[ "$(grep -o '/' <<< "$KSU_META" | wc -l)" -lt 3 ]]; then
@@ -674,7 +674,8 @@ jobs:
           [[ -n "$KSU_CUSTOM_TAG" ]] && echo "自定义版本标识: $KSU_CUSTOM_TAG" || echo "自定义版本标识: 未启用"
           [[ -n "$MANUAL_HASH" ]] && echo "手动指定 hash: $MANUAL_HASH" || echo "手动指定 hash: 未启用"
 
-          curl -LSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/${KSU_MANAGER_BRANCH}/kernel/setup.sh" | bash -s "$KSU_BUILTIN_BRANCH"
+          
+          
           cd ./KernelSU
 
           if [[ -n "$KSU_CUSTOM_TAG" ]]; then
@@ -1002,11 +1003,9 @@ jobs:
 
           # BakaSU配置
           set_config "CONFIG_KSU=y"
-          set_config "CONFIG_KSU_MULTI_MANAGER_SUPPORT=y"
-          set_config "CONFIG_KSU_TOOLKIT_SUPPORT=y"
-          if [[ -n "$KSU_CUSTOM_TAG" ]]; then
-            set_config "CONFIG_KSU_FULL_NAME_FORMAT=\"%TAG_NAME%-${KSU_CUSTOM_TAG}@${KSU_BUILTIN_BRANCH}[%COMMIT_SHA%]\""
-          fi
+          
+          
+          
 
           # KPM配置
           if [ "${{ github.event.inputs.KPM }}" = "KPM" ] || [ "${{ github.event.inputs.KPM }}" = "N/A" ]; then
